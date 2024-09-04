@@ -1,0 +1,90 @@
+arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -std=gnu99 -Wall -o main.o main.c
+arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -std=gnu99 -Wall -o startup.o startup.c
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -T stm32f407.ld -nostartfiles -nodefaultlibs -o executable.elf main.o startup.o
+arm-none-eabi-objcopy -O binary executable.elf executable.bin
+
+
+
+STM32 GCC Commands
+
+Compile Source Files
+Compile a source file into an object file:
+arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -o file.o file.c
+
+Link Object Files
+Link object files to create an ELF executable:
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -T linker_script.ld -o executable.elf file.o
+
+Create Binary File
+Convert the ELF file to a binary file:
+arm-none-eabi-objcopy -O binary executable.elf executable.bin
+
+Create Hex File
+Convert the ELF file to a hex file:
+arm-none-eabi-objcopy -O ihex executable.elf executable.hex
+
+Generate Map File
+Generate a map file from the ELF executable for debugging:
+arm-none-eabi-objdump -x executable.elf > executable.map
+
+Display File Sizes
+Display the size of sections in the ELF file:
+arm-none-eabi-size executable.elf
+
+Assemble Assembly Files
+Assemble an assembly source file into an object file:
+arm-none-eabi-as -mcpu=cortex-m4 -mthumb -o file.o file.s
+
+Generate Listing File
+Generate a listing file from the ELF file:
+arm-none-eabi-objdump -d executable.elf > executable.list
+
+Create Debug Symbols
+Create a debug symbols file (typically not necessary if you already have an ELF file):
+arm-none-eabi-gcc -g -mcpu=cortex-m4 -mthumb -o executable.elf file.o
+
+Flash Firmware
+Using STM32CubeProgrammer to flash the binary file:
+STM32_Programmer_CLI -c port=SWD -w executable.bin 0x08000000
+Note: Replace STM32_Programmer_CLI with the appropriate command if using a different tool for flashing, and adjust the address 0x08000000 if necessary.
+
+Erase Flash Memory
+Erase the entire flash memory before programming:
+STM32_Programmer_CLI -c port=SWD -e all
+
+Verify Flash Memory
+Verify the flashed memory against the binary file:
+STM32_Programmer_CLI -c port=SWD -v executable.bin 0x08000000
+
+Reset MCU
+Reset the MCU to start running the new code:
+STM32_Programmer_CLI -c port=SWD -rst
+
+Check MCU Information
+Get information about the MCU:
+STM32_Programmer_CLI -c port=SWD -i
+
+Check GCC Version
+Check the version of GCC:
+arm-none-eabi-gcc --version
+
+View Map File
+View the map file to understand memory layout and symbol locations:
+cat executable.map
+
+View Linker Script
+View the linker script used in the build process:
+cat linker_script.ld
+
+View Assembly Code
+View the assembly code generated from the ELF file:
+arm-none-eabi-objdump -d executable.elf
+
+View Memory Layout
+View the memory layout of the ELF file:
+arm-none-eabi-objdump -h executable.elf
+
+Disassemble Specific Function
+Disassemble a specific function from the ELF file:
+arm-none-eabi-objdump -d -M reg-names-raw executable.elf | grep <function_name>
+
