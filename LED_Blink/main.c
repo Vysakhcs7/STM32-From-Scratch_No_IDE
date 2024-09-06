@@ -1,53 +1,70 @@
+/*
+* To toggle LED connected to PD12 and PD14 of STM32F407 Discovery Board
+*Steps:
+*Enable clock access to GPIOD
+*Set PD12 AND PD14 as output
+*Set ODR12 and ODR14 to 1(Turn ON)
+*Call delay()
+*Set ODR12 and ODR14 to 0(Turn OFF)
+*/
+
 #include <stdint.h>
 
-void delay(void)
-{
-    for (volatile int i = 0; i < 100000; i++);
-}
+void delay(void);
 
 // RCC AHB1ENR base address
-#define RCC_BASE_ADDR               (0x40023800U)
-#define RCC_AHB1ENR_OFFSET          (0x30U)
-#define RCC_AHB1ENR_ADDR            (RCC_BASE_ADDR + RCC_AHB1ENR_OFFSET)
+#define AHB1_BASE                  0x40020000U
+#define RCC_BASE                   (AHB1_BASE + (0x3800U))
+#define RCC_AHB1ENR                (uint32_t *)(RCC_BASE + (0x30U))
+#define GPIOD_CLOCK_EN             (1U << 3U)
 
-// GPIOD base address
-#define AHB1_BASE_ADDR              (0x40020000U)
-#define GPIOD_BASE_OFFSET           (0x0C00U)
-#define GPIOD_BASE_ADDR             (AHB1_BASE_ADDR + GPIOD_BASE_OFFSET)
+#define GPIOD_BASE                 (AHB1_BASE + (0x0C00U))
+#define GPIOD_MODER                (uint32_t *)(GPIOD_BASE + (0x00U))
+#define PD12_BIT_24_EN             (1U << 24U)
+#define PD12_BIT_25_DISABLE        (~(1U << 25U))
+#define PD14_BIT_28_EN             (1U << 28U)
+#define PD14_BIT_29_DISABLE        (~(1U << 29U))
 
-// GPIO port mode register base address
-#define GPIOD_MODER_OFFSET          (0x00U)
-#define GPIOD_MODER_BASE_ADDR       (GPIOD_BASE_ADDR + GPIOD_MODER_OFFSET)
-
-// GPIO port output data register base address
-#define GPIOD_ODR_OFFSET            (0x14U)
-#define GPIOD_ODR_BASE_ADDR         (GPIOD_BASE_ADDR + GPIOD_ODR_OFFSET)
+#define GPIOD_ODR                  (uint32_t *)(GPIOD_BASE + (0x14U))
+#define PD12_OUTPUT_EN             (1U << 12U)
+#define PD12_OUTPUT_DISABLE        (~(1U << 12U))
+#define PD14_OUTPUT_EN             (1U << 14U)
+#define PD14_OUTPUT_DISABLE        (~(1U << 14U))
 
 int main(void)
 {
-    // Enable clock for GPIOD (Bit 3 GPIODEN: IO port D clock enable in RCC_AHB1ENR register)
-    uint32_t *pRCC = (uint32_t *)RCC_AHB1ENR_ADDR;
-    *pRCC |=  0x00000008;
+    uint32_t *gpiod_clock, *gpiod_moder, *gpiod_odr;
+    gpiod_clock = RCC_AHB1ENR;
+    //Clock for GPIOD enabled
+    *gpiod_clock |= GPIOD_CLOCK_EN;
+   
+    gpiod_moder = GPIOD_MODER;
+    //PD12 set as output
+    *gpiod_moder |= PD12_BIT_24_EN;
+    *gpiod_moder &= PD12_BIT_25_DISABLE;
+    //PD14 set as output
+    *gpiod_moder |= PD14_BIT_28_EN;
+    *gpiod_moder &= PD14_BIT_29_DISABLE;
+    
+     gpiod_odr = GPIOD_ODR;
 
-    // Set PD12 and PD14 as General purpose output mode
-    // PD12 corresponds to MODER12[1:0] -> Bits 24-25
-    // PD14 corresponds to MODER14[1:0] -> Bits 28-29
-    uint32_t *pGPIOD_MODER = (uint32_t *)GPIOD_MODER_BASE_ADDR;
-    *pGPIOD_MODER &= ~((0x3 << 24) | (0x3 << 28));  // Clear MODER12 and MODER14
-    *pGPIOD_MODER |=  ((0x1 << 24) | (0x1 << 28));  // Set MODER12 and MODER14 as output
-
-    uint32_t *pGPIOD_ODR = (uint32_t *)GPIOD_ODR_BASE_ADDR;
 
     while (1)
     {
-        // Set PD12 and PD14 (Bits 12 and 14) to high
-        *pGPIOD_ODR |= (1 << 12) | (1 << 14);
+        //PD12 and PD14 set
+        *gpiod_odr |= PD12_OUTPUT_EN;
+        *gpiod_odr |= PD14_OUTPUT_EN;
         delay();
-
-        // Set PD12 and PD14 to low
-        *pGPIOD_ODR &= ~((1 << 12) | (1 << 14));
+        //PD12 and PD14 reset
+        *gpiod_odr &= PD12_OUTPUT_DISABLE;
+        *gpiod_odr &= PD14_OUTPUT_DISABLE;
         delay();
     }
 
     return 0;
+}
+
+void delay(void)
+{
+    for (volatile int i = 0; i < 400000; i++);
 }

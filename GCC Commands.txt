@@ -1,7 +1,21 @@
+arm-none-eabi-objdump.exe -h main.o
+-none-eabi-objdump.exe
+
+arm-none-eabi-gcc -nostdlib -T stm32f407.ld -Wl,"-Map=final.map" -o executable.elf main.o startup.o
+
 arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -std=gnu99 -Wall -o main.o main.c
 arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -std=gnu99 -Wall -o startup.o startup.c
 arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -T stm32f407.ld -nostartfiles -nodefaultlibs -o executable.elf main.o startup.o
 arm-none-eabi-objcopy -O binary executable.elf executable.bin
+arm-none-eabi-gcc -nostdlib -T stm32f407.ld -Wl,"-Map=final.map" -o executable.elf main.o startup.o
+
+
+arm-none-eabi-nm.exe executable.elf
+arm-none-eabi-gcc -nostdlib -T stm32f407.ld *.o -o executable.elf
+arm-none-eabi-objdump.exe -h executable.elf
+arm-none-eabi-gcc
+arm-none-eabi-gcc -nostdlib -T stm32f407.ld -wl, -Map=final.map -o executable.elf 
+
 
 
 
