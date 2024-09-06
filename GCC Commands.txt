@@ -1,104 +1,111 @@
-arm-none-eabi-objdump.exe -h main.o
--none-eabi-objdump.exe
 
-arm-none-eabi-gcc -nostdlib -T stm32f407.ld -Wl,"-Map=final.map" -o executable.elf main.o startup.o
+STM32 GCC Commands and Explanations
 
-arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -std=gnu99 -Wall -o main.o main.c
-arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -std=gnu99 -Wall -o startup.o startup.c
-arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -T stm32f407.ld -nostartfiles -nodefaultlibs -o executable.elf main.o startup.o
-arm-none-eabi-objcopy -O binary executable.elf executable.bin
-arm-none-eabi-gcc -nostdlib -T stm32f407.ld -Wl,"-Map=final.map" -o executable.elf main.o startup.o
+1. Compilation and Linking
+---------------------------
+- Compile Source Files:
+  Compiles a C source file into an object file.
+  Command:
+  arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -o file.o file.c
 
+- Assemble Assembly Files:
+  Assembles an assembly source file into an object file.
+  Command:
+  arm-none-eabi-as -mcpu=cortex-m4 -mthumb -o file.o file.s
 
-arm-none-eabi-nm.exe executable.elf
-arm-none-eabi-gcc -nostdlib -T stm32f407.ld *.o -o executable.elf
-arm-none-eabi-objdump.exe -h executable.elf
-arm-none-eabi-gcc
-arm-none-eabi-gcc -nostdlib -T stm32f407.ld -wl, -Map=final.map -o executable.elf 
+- Link Object Files:
+  Links object files to create an ELF executable.
+  Command:
+  arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -T linker_script.ld -o executable.elf file.o
 
+2. File Format Conversion
+--------------------------
+- Create Binary File:
+  Converts the ELF executable to a binary file.
+  Command:
+  arm-none-eabi-objcopy -O binary executable.elf executable.bin
 
+- Create Hex File:
+  Converts the ELF executable to a hex file.
+  Command:
+  arm-none-eabi-objcopy -O ihex executable.elf executable.hex
 
+3. Debugging and Inspection
+----------------------------
+- Generate Map File:
+  Generates a map file from the ELF executable, providing information on memory layout.
+  Command:
+  arm-none-eabi-objdump -x executable.elf > executable.map
 
-STM32 GCC Commands
+- Generate Listing File:
+  Generates a listing file (disassembly) from the ELF file.
+  Command:
+  arm-none-eabi-objdump -d executable.elf > executable.list
 
-Compile Source Files
-Compile a source file into an object file:
-arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -o file.o file.c
+- Display File Sizes:
+  Displays the size of sections in the ELF file.
+  Command:
+  arm-none-eabi-size executable.elf
 
-Link Object Files
-Link object files to create an ELF executable:
-arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -T linker_script.ld -o executable.elf file.o
+- Create Debug Symbols:
+  Includes debug symbols when compiling, used for debugging with GDB or other tools.
+  Command:
+  arm-none-eabi-gcc -g -mcpu=cortex-m4 -mthumb -o executable.elf file.o
 
-Create Binary File
-Convert the ELF file to a binary file:
-arm-none-eabi-objcopy -O binary executable.elf executable.bin
+4. Memory and Assembly Information
+-----------------------------------
+- View Assembly Code:
+  Disassembles the ELF file and outputs the assembly code.
+  Command:
+  arm-none-eabi-objdump -d executable.elf
 
-Create Hex File
-Convert the ELF file to a hex file:
-arm-none-eabi-objcopy -O ihex executable.elf executable.hex
+- Disassemble Specific Function:
+  Disassembles a specific function from the ELF file.
+  Command:
+  arm-none-eabi-objdump -d -M reg-names-raw executable.elf | grep <function_name>
 
-Generate Map File
-Generate a map file from the ELF executable for debugging:
-arm-none-eabi-objdump -x executable.elf > executable.map
+- View Memory Layout:
+  Views the memory layout of the ELF file, showing sections and their addresses.
+  Command:
+  arm-none-eabi-objdump -h executable.elf
 
-Display File Sizes
-Display the size of sections in the ELF file:
-arm-none-eabi-size executable.elf
+5. Flash Programming and MCU Control
+-------------------------------------
+- Flash Firmware:
+  Uses STM32CubeProgrammer to flash the binary file to the STM32 microcontroller.
+  Command:
+  STM32_Programmer_CLI -c port=SWD -w executable.bin 0x08000000
 
-Assemble Assembly Files
-Assemble an assembly source file into an object file:
-arm-none-eabi-as -mcpu=cortex-m4 -mthumb -o file.o file.s
+- Erase Flash Memory:
+  Erases the entire flash memory before programming.
+  Command:
+  STM32_Programmer_CLI -c port=SWD -e all
 
-Generate Listing File
-Generate a listing file from the ELF file:
-arm-none-eabi-objdump -d executable.elf > executable.list
+- Verify Flash Memory:
+  Verifies the flashed memory against the binary file.
+  Command:
+  STM32_Programmer_CLI -c port=SWD -v executable.bin 0x08000000
 
-Create Debug Symbols
-Create a debug symbols file (typically not necessary if you already have an ELF file):
-arm-none-eabi-gcc -g -mcpu=cortex-m4 -mthumb -o executable.elf file.o
+- Reset MCU:
+  Resets the MCU to start running the newly flashed code.
+  Command:
+  STM32_Programmer_CLI -c port=SWD -rst
 
-Flash Firmware
-Using STM32CubeProgrammer to flash the binary file:
-STM32_Programmer_CLI -c port=SWD -w executable.bin 0x08000000
-Note: Replace STM32_Programmer_CLI with the appropriate command if using a different tool for flashing, and adjust the address 0x08000000 if necessary.
+6. Miscellaneous Commands
+--------------------------
+- Check GCC Version:
+  Command to check the version of GCC:
+  arm-none-eabi-gcc --version
 
-Erase Flash Memory
-Erase the entire flash memory before programming:
-STM32_Programmer_CLI -c port=SWD -e all
+- View Map File:
+  Command to view the map file to understand memory layout and symbol locations:
+  cat executable.map
 
-Verify Flash Memory
-Verify the flashed memory against the binary file:
-STM32_Programmer_CLI -c port=SWD -v executable.bin 0x08000000
+- View Linker Script:
+  Command to view the linker script used in the build process:
+  cat linker_script.ld
 
-Reset MCU
-Reset the MCU to start running the new code:
-STM32_Programmer_CLI -c port=SWD -rst
-
-Check MCU Information
-Get information about the MCU:
-STM32_Programmer_CLI -c port=SWD -i
-
-Check GCC Version
-Check the version of GCC:
-arm-none-eabi-gcc --version
-
-View Map File
-View the map file to understand memory layout and symbol locations:
-cat executable.map
-
-View Linker Script
-View the linker script used in the build process:
-cat linker_script.ld
-
-View Assembly Code
-View the assembly code generated from the ELF file:
-arm-none-eabi-objdump -d executable.elf
-
-View Memory Layout
-View the memory layout of the ELF file:
-arm-none-eabi-objdump -h executable.elf
-
-Disassemble Specific Function
-Disassemble a specific function from the ELF file:
-arm-none-eabi-objdump -d -M reg-names-raw executable.elf | grep <function_name>
+- View Memory Layout:
+  Command to view memory layout of ELF:
+  arm-none-eabi-objdump -h executable.elf
 
