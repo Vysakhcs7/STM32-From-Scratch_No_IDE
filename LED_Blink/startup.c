@@ -231,14 +231,27 @@ void Reset_Handler(void) {
     for (uint32_t i = 0; i < size; i++) {
         *pDst++ = *pSrc++;
     }
+    //OR
+    // uint32_t *src = &_etext;
+    // uint32_t *dst = &_sdata;
+    // while( dst < &_edata){
+    //     *dst++ = *src++;
+    // }
 
-    // Initialize the .bss section to zero
+
+    //Initialize the .bss section to zero
     size = (uint32_t)&_ebss - (uint32_t)&_sbss;
     pDst = (uint8_t*)&_sbss;
 
     for (uint32_t i = 0; i < size; i++) {
         *pDst++ = 0;
     }
+        //OR
+    // uint32_t *p = &_sbss;
+    // while( p < &_ebss)
+    // {
+    //     *p++ = 0;
+    // }
 
     // Call the main function
     main();
